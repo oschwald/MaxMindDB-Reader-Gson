@@ -1,7 +1,8 @@
 package com.maxmind.db;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,10 +19,8 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.FloatNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({"boxing", "static-method"})
 public class DecoderTest {
@@ -262,22 +261,20 @@ public class DecoderTest {
         return booleans;
     }
 
-    private static Map<ObjectNode, byte[]> maps() {
-        Map<ObjectNode, byte[]> maps = new HashMap<ObjectNode, byte[]>();
+    private static Map<JsonObject, byte[]> maps() {
+        Map<JsonObject, byte[]> maps = new HashMap<>();
 
-        ObjectMapper om = new ObjectMapper();
-
-        ObjectNode empty = om.createObjectNode();
+        JsonObject empty = new JsonObject();
         maps.put(empty, new byte[]{(byte) 0xe0});
 
-        ObjectNode one = om.createObjectNode();
-        one.put("en", "Foo");
+        JsonObject one = new JsonObject();
+        one.addProperty("en", "Foo");
         maps.put(one, new byte[]{(byte) 0xe1, /* en */0x42, 0x65, 0x6e,
         /* Foo */0x43, 0x46, 0x6f, 0x6f});
 
-        ObjectNode two = om.createObjectNode();
-        two.put("en", "Foo");
-        two.put("zh", "人");
+        JsonObject two = new JsonObject();
+        two.addProperty("en", "Foo");
+        two.addProperty("zh", "人");
         maps.put(two, new byte[]{(byte) 0xe2,
         /* en */
                 0x42, 0x65, 0x6e,
@@ -288,8 +285,8 @@ public class DecoderTest {
         /* 人 */
                 0x43, (byte) 0xe4, (byte) 0xba, (byte) 0xba});
 
-        ObjectNode nested = om.createObjectNode();
-        nested.set("name", two);
+        JsonObject nested = new JsonObject();
+        nested.add("name", two);
 
         maps.put(nested, new byte[]{(byte) 0xe1, /* name */
                 0x44, 0x6e, 0x61, 0x6d, 0x65, (byte) 0xe2,/* en */
@@ -301,11 +298,11 @@ public class DecoderTest {
         /* 人 */
                 0x43, (byte) 0xe4, (byte) 0xba, (byte) 0xba});
 
-        ObjectNode guess = om.createObjectNode();
-        ArrayNode languages = om.createArrayNode();
+        JsonObject guess = new JsonObject();
+        JsonArray languages = new JsonArray();
         languages.add("en");
         languages.add("zh");
-        guess.set("languages", languages);
+        guess.add("languages", languages);
         maps.put(guess, new byte[]{(byte) 0xe1,/* languages */
                 0x49, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x73,
         /* array */
@@ -318,17 +315,16 @@ public class DecoderTest {
         return maps;
     }
 
-    private static Map<ArrayNode, byte[]> arrays() {
-        Map<ArrayNode, byte[]> arrays = new HashMap<ArrayNode, byte[]>();
-        ObjectMapper om = new ObjectMapper();
+    private static Map<JsonArray, byte[]> arrays() {
+        Map<JsonArray, byte[]> arrays = new HashMap<>();
 
-        ArrayNode f1 = om.createArrayNode();
+        JsonArray f1 = new JsonArray();
         f1.add("Foo");
         arrays.put(f1, new byte[]{0x1, 0x4,
         /* Foo */
                 0x43, 0x46, 0x6f, 0x6f});
 
-        ArrayNode f2 = om.createArrayNode();
+        JsonArray f2 = new JsonArray();
         f2.add("Foo");
         f2.add("人");
         arrays.put(f2, new byte[]{0x2, 0x4,
@@ -337,7 +333,7 @@ public class DecoderTest {
         /* 人 */
                 0x43, (byte) 0xe4, (byte) 0xba, (byte) 0xba});
 
-        ArrayNode empty = om.createArrayNode();
+        JsonArray empty = new JsonArray();
         arrays.put(empty, new byte[]{0x0, 0x4});
 
         return arrays;
@@ -430,26 +426,26 @@ public class DecoderTest {
 
                 // XXX - this could be streamlined
                 if (type.equals(Decoder.Type.BYTES)) {
-                    assertArrayEquals(desc, (byte[]) expect, decoder.decode(0).binaryValue());
+                    assertArrayEquals(desc, (byte[]) expect, ReaderTest.toByteArray((JsonArray) decoder.decode(0)));
                 } else if (type.equals(Decoder.Type.ARRAY)) {
                     assertEquals(desc, expect, decoder.decode(0));
                 } else if (type.equals(Decoder.Type.UINT16)
                         || type.equals(Decoder.Type.INT32)) {
-                    assertEquals(desc, expect, decoder.decode(0).asInt());
+                    assertEquals(desc, expect, decoder.decode(0).getAsInt());
                 } else if (type.equals(Decoder.Type.UINT32)
                         || type.equals(Decoder.Type.POINTER)) {
-                    assertEquals(desc, expect, decoder.decode(0).asLong());
+                    assertEquals(desc, expect, decoder.decode(0).getAsLong());
                 } else if (type.equals(Decoder.Type.UINT64)
                         || type.equals(Decoder.Type.UINT128)) {
-                    assertEquals(desc, expect, decoder.decode(0).bigIntegerValue());
+                    assertEquals(desc, expect, decoder.decode(0).getAsBigInteger());
                 } else if (type.equals(Decoder.Type.DOUBLE)) {
-                    assertEquals(desc, expect, decoder.decode(0).asDouble());
+                    assertEquals(desc, expect, decoder.decode(0).getAsDouble());
                 } else if (type.equals(Decoder.Type.FLOAT)) {
-                    assertEquals(desc, new FloatNode((Float) expect), decoder.decode(0));
+                    assertEquals(desc, new JsonPrimitive((Float) expect), decoder.decode(0));
                 } else if (type.equals(Decoder.Type.UTF8_STRING)) {
-                    assertEquals(desc, expect, decoder.decode(0).asText());
+                    assertEquals(desc, expect, decoder.decode(0).getAsString());
                 } else if (type.equals(Decoder.Type.BOOLEAN)) {
-                    assertEquals(desc, expect, decoder.decode(0).asBoolean());
+                    assertEquals(desc, expect, decoder.decode(0).getAsBoolean());
                 } else {
                     assertEquals(desc, expect, decoder.decode(0));
                 }

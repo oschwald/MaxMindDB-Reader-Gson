@@ -1,9 +1,9 @@
 package com.maxmind.db;
 
+import com.google.gson.JsonElement;
+
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * A simplistic cache using a {@link ConcurrentHashMap}. There's no eviction
@@ -15,7 +15,7 @@ public class CHMCache implements NodeCache {
     private static final int DEFAULT_CAPACITY = 4096;
 
     private final int capacity;
-    private final ConcurrentHashMap<Integer, JsonNode> cache;
+    private final ConcurrentHashMap<Integer, JsonElement> cache;
     private boolean cacheFull = false;
 
     public CHMCache() {
@@ -24,13 +24,13 @@ public class CHMCache implements NodeCache {
 
     public CHMCache(int capacity) {
         this.capacity = capacity;
-        this.cache = new ConcurrentHashMap<Integer, JsonNode>(capacity);
+        this.cache = new ConcurrentHashMap<>(capacity);
     }
 
     @Override
-    public JsonNode get(int key, Loader loader) throws IOException {
+    public JsonElement get(int key, Loader loader) throws IOException {
         Integer k = key;
-        JsonNode value = cache.get(k);
+        JsonElement value = cache.get(k);
         if (value == null) {
             value = loader.load(key);
             if (!cacheFull) {

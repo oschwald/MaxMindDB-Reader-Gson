@@ -1,15 +1,14 @@
 package com.maxmind.db;
 
-import static org.junit.Assert.assertEquals;
+import com.google.gson.JsonObject;
+import com.maxmind.db.Reader.FileMode;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.maxmind.db.Reader.FileMode;
+import static org.junit.Assert.assertEquals;
 
 public class PointerTest {
     @SuppressWarnings("static-method")
@@ -19,30 +18,28 @@ public class PointerTest {
         BufferHolder ptf = new BufferHolder(file, FileMode.MEMORY);
         Decoder decoder = new Decoder(NoCache.getInstance(), ptf.get(), 0);
 
-        ObjectMapper om = new ObjectMapper();
-
-        ObjectNode map = om.createObjectNode();
-        map.put("long_key", "long_value1");
+        JsonObject map = new JsonObject();
+        map.addProperty("long_key", "long_value1");
         assertEquals(map, decoder.decode(0));
 
-        map = om.createObjectNode();
-        map.put("long_key", "long_value2");
+        map = new JsonObject();
+        map.addProperty("long_key", "long_value2");
         assertEquals(map, decoder.decode(22));
 
-        map = om.createObjectNode();
-        map.put("long_key2", "long_value1");
+        map = new JsonObject();
+        map.addProperty("long_key2", "long_value1");
         assertEquals(map, decoder.decode(37));
 
-        map = om.createObjectNode();
-        map.put("long_key2", "long_value2");
+        map = new JsonObject();
+        map.addProperty("long_key2", "long_value2");
         assertEquals(map, decoder.decode(50));
 
-        map = om.createObjectNode();
-        map.put("long_key", "long_value1");
+        map = new JsonObject();
+        map.addProperty("long_key", "long_value1");
         assertEquals(map, decoder.decode(55));
 
-        map = om.createObjectNode();
-        map.put("long_key2", "long_value2");
+        map = new JsonObject();
+        map.addProperty("long_key2", "long_value2");
         assertEquals(map, decoder.decode(57));
     }
 }

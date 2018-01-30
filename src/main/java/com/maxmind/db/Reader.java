@@ -1,5 +1,8 @@
 package com.maxmind.db;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -7,8 +10,6 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicReference;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Instances of this class provide a reader for the MaxMind DB format. IP
@@ -117,7 +118,7 @@ public final class Reader implements Closeable {
     }
 
     private Reader(BufferHolder bufferHolder, String name, NodeCache cache) throws IOException {
-        this.bufferHolderReference = new AtomicReference<BufferHolder>(
+        this.bufferHolderReference = new AtomicReference<>(
                 bufferHolder);
 
         if (cache == null) {
@@ -129,7 +130,7 @@ public final class Reader implements Closeable {
         int start = this.findMetadataStart(buffer, name);
 
         Decoder metadataDecoder = new Decoder(this.cache, buffer, start);
-        this.metadata = new Metadata(metadataDecoder.decode(start));
+        this.metadata = new Metadata((JsonObject) metadataDecoder.decode(start));
 
         this.ipV4Start = this.findIpV4StartNode(buffer);
     }
@@ -141,7 +142,7 @@ public final class Reader implements Closeable {
      * @return the record for the IP address.
      * @throws IOException if a file I/O error occurs.
      */
-    public JsonNode get(InetAddress ipAddress) throws IOException {
+    public JsonElement get(InetAddress ipAddress) throws IOException {
         ByteBuffer buffer = this.getBufferHolder().get();
         int pointer = this.findAddressInTree(buffer, ipAddress);
         if (pointer == 0) {
@@ -234,7 +235,7 @@ public final class Reader implements Closeable {
         }
     }
 
-    private JsonNode resolveDataPointer(ByteBuffer buffer, int pointer)
+    private JsonElement resolveDataPointer(ByteBuffer buffer, int pointer)
             throws IOException {
         int resolved = (pointer - this.metadata.getNodeCount())
                 + this.metadata.getSearchTreeSize();

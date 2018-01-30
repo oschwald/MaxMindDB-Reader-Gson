@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>com.maxmind.db</groupId>
     <artifactId>maxmind-db</artifactId>
     <version>1.2.3-SNAPSHOT</version>
@@ -8,6 +10,7 @@
     <name>MaxMind DB Reader</name>
     <description>Reader for MaxMind DB</description>
     <url>http://dev.maxmind.com/</url>
+
     <licenses>
         <license>
             <name>Apache License 2.0</name>
@@ -15,19 +18,23 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
     <organization>
         <name>MaxMind, Inc.</name>
         <url>http://www.maxmind.com/</url>
     </organization>
+
     <scm>
         <url>https://github.com/maxmind/MaxMind-DB-Reader-java</url>
         <connection>scm:git:git://github.com:maxmind/MaxMind-DB-Reader-java.git</connection>
         <developerConnection>scm:git:git@github.com:maxmind/MaxMind-DB-Reader-java.git</developerConnection>
     </scm>
+
     <issueManagement>
         <url>https://github.com/maxmind/MaxMind-DB-Reader-java/issues</url>
         <system>GitHub</system>
     </issueManagement>
+
     <developers>
         <developer>
             <id>oschwald</id>
@@ -35,35 +42,24 @@
             <email>goschwald@maxmind.com</email>
         </developer>
     </developers>
+
     <dependencies>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.2</version>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.9.2</version>
-        </dependency>
     </dependencies>
+
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -129,6 +125,7 @@
             </plugin>
         </plugins>
     </build>
+
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>

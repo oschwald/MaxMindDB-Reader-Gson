@@ -1,20 +1,18 @@
 package com.maxmind.db;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.*;
+import java.nio.charset.StandardCharsets;
 
 /*
  * Decoder for MaxMind DB data.
@@ -23,9 +21,9 @@ import com.fasterxml.jackson.databind.node.*;
  */
 final class Decoder {
 
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final Gson objectmapper = new Gson();
 
     private static final int[] POINTER_VALUE_OFFSETS = { 0, 0, 1 << 11, (1 << 19) + ((1) << 11), 0 };
 
@@ -71,12 +69,12 @@ final class Decoder {
 
     private final NodeCache.Loader cacheLoader = new NodeCache.Loader() {
         @Override
-        public JsonNode load(int key) throws IOException {
+        public JsonElement load(int key) throws IOException {
             return decode(key);
         }
     };
 
-    JsonNode decode(int offset) throws IOException {
+    JsonElement decode(int offset) throws IOException {
         if (offset >= this.buffer.capacity()) {
             throw new InvalidDatabaseException(
                     "The MaxMind DB file's data section contains bad data: "
@@ -87,7 +85,7 @@ final class Decoder {
         return decode();
     }
 
-    JsonNode decode() throws IOException {
+    JsonElement decode() throws IOException {
         int ctrlByte = 0xFF & this.buffer.get();
 
         Type type = Type.fromControlByte(ctrlByte);
@@ -103,12 +101,12 @@ final class Decoder {
 
             // for unit testing
             if (this.POINTER_TEST_HACK) {
-                return new LongNode(pointer);
+                return new JsonPrimitive(pointer);
             }
 
             int targetOffset = (int) pointer;
             int position = buffer.position();
-            JsonNode node = cache.get(targetOffset, cacheLoader);
+            JsonElement node = cache.get(targetOffset, cacheLoader);
             buffer.position(position);
             return node;
         }
@@ -147,7 +145,7 @@ final class Decoder {
         return this.decodeByType(type, size);
     }
 
-    private JsonNode decodeByType(Type type, int size)
+    private JsonElement decodeByType(Type type, int size)
             throws IOException {
         switch (type) {
             case MAP:
@@ -155,15 +153,15 @@ final class Decoder {
             case ARRAY:
                 return this.decodeArray(size);
             case BOOLEAN:
-                return Decoder.decodeBoolean(size);
+                return decodeBoolean(size);
             case UTF8_STRING:
-                return new TextNode(this.decodeString(size));
+                return new JsonPrimitive(this.decodeString(size));
             case DOUBLE:
                 return this.decodeDouble(size);
             case FLOAT:
                 return this.decodeFloat(size);
             case BYTES:
-                return new BinaryNode(this.getByteArray(size));
+                return objectmapper.toJsonTree(getByteArray(size));
             case UINT16:
                 return this.decodeUint16(size);
             case UINT32:
@@ -188,12 +186,12 @@ final class Decoder {
         return s;
     }
 
-    private IntNode decodeUint16(int size) {
-        return new IntNode(this.decodeInteger(size));
+    private JsonPrimitive decodeUint16(int size) {
+        return new JsonPrimitive(this.decodeInteger(size));
     }
 
-    private IntNode decodeInt32(int size) {
-        return new IntNode(this.decodeInteger(size));
+    private JsonPrimitive decodeInt32(int size) {
+        return new JsonPrimitive(this.decodeInteger(size));
     }
 
     private long decodeLong(int size) {
@@ -204,8 +202,8 @@ final class Decoder {
         return integer;
     }
 
-    private LongNode decodeUint32(int size) {
-        return new LongNode(this.decodeLong(size));
+    private JsonPrimitive decodeUint32(int size) {
+        return new JsonPrimitive(this.decodeLong(size));
     }
 
     private int decodeInteger(int size) {
@@ -224,36 +222,36 @@ final class Decoder {
         return integer;
     }
 
-    private BigIntegerNode decodeBigInteger(int size) {
+    private JsonPrimitive decodeBigInteger(int size) {
         byte[] bytes = this.getByteArray(size);
-        return new BigIntegerNode(new BigInteger(1, bytes));
+        return new JsonPrimitive(new BigInteger(1, bytes));
     }
 
-    private DoubleNode decodeDouble(int size) throws InvalidDatabaseException {
+    private JsonPrimitive decodeDouble(int size) throws InvalidDatabaseException {
         if (size != 8) {
             throw new InvalidDatabaseException(
                     "The MaxMind DB file's data section contains bad data: "
                             + "invalid size of double.");
         }
-        return new DoubleNode(this.buffer.getDouble());
+        return new JsonPrimitive(this.buffer.getDouble());
     }
 
-    private FloatNode decodeFloat(int size) throws InvalidDatabaseException {
+    private JsonPrimitive decodeFloat(int size) throws InvalidDatabaseException {
         if (size != 4) {
             throw new InvalidDatabaseException(
                     "The MaxMind DB file's data section contains bad data: "
                             + "invalid size of float.");
         }
-        return new FloatNode(this.buffer.getFloat());
+        return new JsonPrimitive(this.buffer.getFloat());
     }
 
-    private static BooleanNode decodeBoolean(int size)
+    private static JsonPrimitive decodeBoolean(int size)
             throws InvalidDatabaseException {
         switch (size) {
             case 0:
-                return BooleanNode.FALSE;
+                return new JsonPrimitive(false);
             case 1:
-                return BooleanNode.TRUE;
+                return new JsonPrimitive(true);
             default:
                 throw new InvalidDatabaseException(
                         "The MaxMind DB file's data section contains bad data: "
@@ -261,32 +259,29 @@ final class Decoder {
         }
     }
 
-    private JsonNode decodeArray(int size) throws IOException {
-
-        List<JsonNode> array = new ArrayList<JsonNode>(size);
+    private JsonArray decodeArray(int size) throws IOException {
+        JsonArray array = new JsonArray();
         for (int i = 0; i < size; i++) {
-            JsonNode r = this.decode();
+            JsonElement r = this.decode();
             array.add(r);
         }
 
-        return new ArrayNode(OBJECT_MAPPER.getNodeFactory(), Collections.unmodifiableList(array));
+        return array;
     }
 
-    private JsonNode decodeMap(int size) throws IOException {
-        int capacity = (int) (size / 0.75F + 1.0F);
-        Map<String, JsonNode> map = new HashMap<String, JsonNode>(capacity);
-
+    private JsonObject decodeMap(int size) throws IOException {
+        JsonObject object = new JsonObject();
         for (int i = 0; i < size; i++) {
-            String key = this.decode().asText();
-            JsonNode value = this.decode();
-            map.put(key, value);
+            String key = this.decode().getAsString();
+            JsonElement value = this.decode();
+            object.add(key, value);
         }
 
-        return new ObjectNode(OBJECT_MAPPER.getNodeFactory(), Collections.unmodifiableMap(map));
+        return object;
     }
 
     private byte[] getByteArray(int length) {
-        return Decoder.getByteArray(this.buffer, length);
+        return getByteArray(this.buffer, length);
     }
 
     private static byte[] getByteArray(ByteBuffer buffer, int length) {

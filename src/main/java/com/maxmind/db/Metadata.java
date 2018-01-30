@@ -1,14 +1,13 @@
 package com.maxmind.db;
 
-import java.util.ArrayList;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public final class Metadata {
     private final int binaryFormatMajorVersion;
@@ -18,11 +17,11 @@ public final class Metadata {
 
     private final String databaseType;
 
-    private final JsonNode description;
+    private final JsonElement description;
 
     private final int ipVersion;
 
-    private final JsonNode languages;
+    private final JsonElement languages;
 
     private final int nodeByteSize;
 
@@ -32,18 +31,18 @@ public final class Metadata {
 
     private final int searchTreeSize;
 
-    Metadata(JsonNode metadata) {
+    Metadata(JsonObject metadata) {
         this.binaryFormatMajorVersion = metadata.get(
-                "binary_format_major_version").asInt();
+                "binary_format_major_version").getAsInt();
         this.binaryFormatMinorVersion = metadata.get(
-                "binary_format_minor_version").asInt();
-        this.buildEpoch = metadata.get("build_epoch").asLong();
-        this.databaseType = metadata.get("database_type").asText();
+                "binary_format_minor_version").getAsInt();
+        this.buildEpoch = metadata.get("build_epoch").getAsLong();
+        this.databaseType = metadata.get("database_type").getAsString();
         this.languages = metadata.get("languages");
         this.description = metadata.get("description");
-        this.ipVersion = metadata.get("ip_version").asInt();
-        this.nodeCount = metadata.get("node_count").asInt();
-        this.recordSize = metadata.get("record_size").asInt();
+        this.ipVersion = metadata.get("ip_version").getAsInt();
+        this.nodeCount = metadata.get("node_count").getAsInt();
+        this.recordSize = metadata.get("record_size").getAsInt();
         this.nodeByteSize = this.recordSize / 4;
         this.searchTreeSize = this.nodeCount * this.nodeByteSize;
     }
@@ -82,9 +81,7 @@ public final class Metadata {
      * @return map from language code to description in that language.
      */
     public Map<String, String> getDescription() {
-        return new ObjectMapper().convertValue(this.description,
-                new TypeReference<HashMap<String, String>>() {
-                });
+        return new Gson().fromJson(this.description, new TypeToken<Map<String, String>>(){}.getType());
     }
 
     /**
@@ -99,9 +96,7 @@ public final class Metadata {
      * @return list of languages supported by the database.
      */
     public List<String> getLanguages() {
-        return new ObjectMapper().convertValue(this.languages,
-                new TypeReference<ArrayList<String>>() {
-                });
+        return new Gson().fromJson(this.languages, new TypeToken<List<String>>(){}.getType());
     }
 
     /**

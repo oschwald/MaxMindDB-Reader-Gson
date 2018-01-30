@@ -1,8 +1,8 @@
 package com.maxmind.db;
 
-import java.io.IOException;
+import com.google.gson.JsonElement;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import java.io.IOException;
 
 /**
  * A no-op cache singleton.
@@ -15,7 +15,7 @@ public class NoCache implements NodeCache {
     }
 
     @Override
-    public JsonNode get(int key, Loader loader) throws IOException {
+    public JsonElement get(int key, Loader loader) throws IOException {
         return loader.load(key);
     }
 
