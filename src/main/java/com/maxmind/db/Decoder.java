@@ -29,7 +29,7 @@ final class Decoder {
 
     // XXX - This is only for unit testings. We should possibly make a
     // constructor to set this
-    boolean POINTER_TEST_HACK = false;
+    boolean POINTER_TEST_HACK;
 
     private final NodeCache cache;
 
@@ -44,7 +44,7 @@ final class Decoder {
 
         // Java clones the array when you call values(). Caching it increased
         // the speed by about 5000 requests per second on my machine.
-        final static Type[] values = Type.values();
+        static final Type[] values = Type.values();
 
         public static Type get(int i) {
             return Type.values[i];
@@ -93,7 +93,7 @@ final class Decoder {
         // Pointers are a special case, we don't read the next 'size' bytes, we
         // use the size to determine the length of the pointer and then follow
         // it.
-        if (type.equals(Type.POINTER)) {
+        if (type == Type.POINTER) {
             int pointerSize = ((ctrlByte >>> 3) & 0x3) + 1;
             int base = pointerSize == 4 ? (byte) 0 : (byte) (ctrlByte & 0x7);
             int packed = this.decodeInteger(base, pointerSize);
@@ -111,7 +111,7 @@ final class Decoder {
             return node;
         }
 
-        if (type.equals(Type.EXTENDED)) {
+        if (type == Type.EXTENDED) {
             int nextByte = this.buffer.get();
 
             int typeNum = nextByte + 7;
@@ -120,7 +120,7 @@ final class Decoder {
                 throw new InvalidDatabaseException(
                         "Something went horribly wrong in the decoder. An extended type "
                                 + "resolved to a type number < 8 (" + typeNum
-                                + ")");
+                                + ')');
             }
 
             type = Type.get(typeNum);

@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.After;
 import org.junit.Before;
@@ -23,10 +24,7 @@ import org.junit.rules.ExpectedException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ReaderTest {
 
@@ -48,17 +46,14 @@ public class ReaderTest {
     public void test() throws IOException {
         for (long recordSize : new long[]{24, 28, 32}) {
             for (int ipVersion : new int[]{4, 6}) {
-                File file = getFile("MaxMind-DB-test-ipv" + ipVersion + "-" + recordSize + ".mmdb");
-                Reader reader = new Reader(file);
-                try {
+                File file = getFile("MaxMind-DB-test-ipv" + ipVersion + '-' + recordSize + ".mmdb");
+                try (Reader reader = new Reader(file)) {
                     this.testMetadata(reader, ipVersion, recordSize);
                     if (ipVersion == 4) {
                         this.testIpV4(reader, file);
                     } else {
                         this.testIpV6(reader, file);
                     }
-                } finally {
-                    reader.close();
                 }
             }
         }
@@ -98,7 +93,7 @@ public class ReaderTest {
     private void testDecodingTypes(Reader reader) throws IOException {
         JsonObject record = (JsonObject) reader.get(InetAddress.getByName("::1.1.1.0"));
 
-        assertEquals(true, record.get("boolean").getAsBoolean());
+        assertTrue(record.get("boolean").getAsBoolean());
 
         JsonArray bytesArray = record.get("bytes").getAsJsonArray();
         assertArrayEquals(new byte[]{0, 0, 0, (byte) 42},  toByteArray(bytesArray));
@@ -161,7 +156,7 @@ public class ReaderTest {
     private void testZeros(Reader reader) throws IOException {
         JsonObject record = (JsonObject) reader.get(InetAddress.getByName("::"));
 
-        assertEquals(false, record.get("boolean").getAsBoolean());
+        assertFalse(record.get("boolean").getAsBoolean());
 
         assertArrayEquals(new byte[0], toByteArray((JsonArray) record.get("bytes")));
 
@@ -183,7 +178,7 @@ public class ReaderTest {
     }
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void testBrokenDatabaseFile() throws IOException {
@@ -269,11 +264,11 @@ public class ReaderTest {
         assertEquals(ipVersion, metadata.getIpVersion());
         assertEquals("Test", metadata.getDatabaseType());
 
-        List<String> languages = new ArrayList<String>(Arrays.asList("en", "zh"));
+        List<String> languages = new ArrayList<>(Arrays.asList("en", "zh"));
 
         assertEquals(languages, metadata.getLanguages());
 
-        Map<String, String> description = new HashMap<String, String>();
+        Map<String, String> description = new HashMap<>();
         description.put("en", "Test Database");
         description.put("zh", "Test Database Chinese");
 
@@ -297,7 +292,7 @@ public class ReaderTest {
                     + file, data, reader.get(InetAddress.getByName(address)));
         }
 
-        Map<String, String> pairs = new HashMap<String, String>();
+        Map<String, String> pairs = new HashMap<>();
         pairs.put("1.1.1.3", "1.1.1.2");
         pairs.put("1.1.1.5", "1.1.1.4");
         pairs.put("1.1.1.7", "1.1.1.4");
@@ -305,12 +300,12 @@ public class ReaderTest {
         pairs.put("1.1.1.15", "1.1.1.8");
         pairs.put("1.1.1.17", "1.1.1.16");
         pairs.put("1.1.1.31", "1.1.1.16");
-        for (String address : pairs.keySet()) {
+        for (Entry<String, String> stringStringEntry : pairs.entrySet()) {
             JsonObject data = new JsonObject();
-            data.addProperty("ip", pairs.get(address));
+            data.addProperty("ip", stringStringEntry.getValue());
 
-            assertEquals("found expected data record for " + address + " in "
-                    + file, data, reader.get(InetAddress.getByName(address)));
+            assertEquals("found expected data record for " + stringStringEntry.getKey() + " in "
+                    + file, data, reader.get(InetAddress.getByName(stringStringEntry.getKey())));
         }
 
         for (String ip : new String[]{"1.1.1.33", "255.254.253.123"}) {
@@ -320,8 +315,7 @@ public class ReaderTest {
 
     // XXX - logic could be combined with above
     private void testIpV6(Reader reader, File file) throws IOException {
-        String[] subnets = new String[]{"::1:ffff:ffff", "::2:0:0",
-                "::2:0:40", "::2:0:50", "::2:0:58"};
+        String[] subnets = {"::1:ffff:ffff", "::2:0:0", "::2:0:40", "::2:0:50", "::2:0:58"};
 
         for (String address : subnets) {
             JsonObject data = new JsonObject();
@@ -331,7 +325,7 @@ public class ReaderTest {
                     + file, data, reader.get(InetAddress.getByName(address)));
         }
 
-        Map<String, String> pairs = new HashMap<String, String>();
+        Map<String, String> pairs = new HashMap<>();
         pairs.put("::2:0:1", "::2:0:0");
         pairs.put("::2:0:33", "::2:0:0");
         pairs.put("::2:0:39", "::2:0:0");
@@ -341,12 +335,12 @@ public class ReaderTest {
         pairs.put("::2:0:57", "::2:0:50");
         pairs.put("::2:0:59", "::2:0:58");
 
-        for (String address : pairs.keySet()) {
+        for (Entry<String, String> stringStringEntry : pairs.entrySet()) {
             JsonObject data = new JsonObject();
-            data.addProperty("ip", pairs.get(address));
+            data.addProperty("ip", stringStringEntry.getValue());
 
-            assertEquals("found expected data record for " + address + " in "
-                    + file, data, reader.get(InetAddress.getByName(address)));
+            assertEquals("found expected data record for " + stringStringEntry.getKey() + " in "
+                    + file, data, reader.get(InetAddress.getByName(stringStringEntry.getKey())));
         }
 
         for (String ip : new String[]{"1.1.1.33", "255.254.253.123", "89fa::"}) {

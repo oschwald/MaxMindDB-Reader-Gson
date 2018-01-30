@@ -141,6 +141,6 @@ public final class Metadata {
                 + this.buildEpoch + ", databaseType=" + this.databaseType
                 + ", description=" + this.description + ", ipVersion="
                 + this.ipVersion + ", nodeCount=" + this.nodeCount
-                + ", recordSize=" + this.recordSize + "]";
+                + ", recordSize=" + this.recordSize + ']';
     }
 }

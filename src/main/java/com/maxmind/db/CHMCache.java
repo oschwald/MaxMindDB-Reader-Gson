@@ -3,6 +3,7 @@ package com.maxmind.db;
 import com.google.gson.JsonElement;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -15,8 +16,8 @@ public class CHMCache implements NodeCache {
     private static final int DEFAULT_CAPACITY = 4096;
 
     private final int capacity;
-    private final ConcurrentHashMap<Integer, JsonElement> cache;
-    private boolean cacheFull = false;
+    private final Map<Integer, JsonElement> cache;
+    private boolean cacheFull;
 
     public CHMCache() {
         this(DEFAULT_CAPACITY);

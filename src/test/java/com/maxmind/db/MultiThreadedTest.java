@@ -25,11 +25,8 @@ public class MultiThreadedTest {
         Callable<JsonElement> task = new Callable<JsonElement>() {
             @Override
             public JsonElement call() throws IOException {
-                Reader reader = new Reader(ReaderTest.getFile("MaxMind-DB-test-decoder.mmdb"));
-                try {
+                try (Reader reader = new Reader(ReaderTest.getFile("MaxMind-DB-test-decoder.mmdb"))) {
                     return reader.get(InetAddress.getByName("::1.1.1.0"));
-                } finally {
-                    reader.close();
                 }
             }
         };
@@ -39,22 +36,16 @@ public class MultiThreadedTest {
     @Test
     public void streamThreadTest() throws IOException, InterruptedException,
             ExecutionException {
-        Reader reader = new Reader(ReaderTest.getStream("MaxMind-DB-test-decoder.mmdb"));
-        try {
+        try (Reader reader = new Reader(ReaderTest.getStream("MaxMind-DB-test-decoder.mmdb"))) {
             MultiThreadedTest.threadTest(reader);
-        } finally {
-            reader.close();
         }
     }
 
     @Test
     public void mmapThreadTest() throws IOException, InterruptedException,
             ExecutionException {
-        Reader reader = new Reader(ReaderTest.getFile("MaxMind-DB-test-decoder.mmdb"));
-        try {
+        try (Reader reader = new Reader(ReaderTest.getFile("MaxMind-DB-test-decoder.mmdb"))) {
             MultiThreadedTest.threadTest(reader);
-        } finally {
-            reader.close();
         }
     }
 

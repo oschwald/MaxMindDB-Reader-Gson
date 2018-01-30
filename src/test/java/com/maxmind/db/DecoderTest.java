@@ -15,6 +15,7 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -27,7 +28,7 @@ public class DecoderTest {
 
     private static Map<Integer, byte[]> int32() {
         int max = (2 << 30) - 1;
-        HashMap<Integer, byte[]> int32 = new HashMap<Integer, byte[]>();
+        Map<Integer, byte[]> int32 = new HashMap<>();
 
         int32.put(0, new byte[]{0x0, 0x1});
         int32.put(-1, new byte[]{0x4, 0x1, (byte) 0xff, (byte) 0xff,
@@ -56,7 +57,7 @@ public class DecoderTest {
 
     private static Map<Long, byte[]> uint32() {
         long max = (((long) 1) << 32) - 1;
-        HashMap<Long, byte[]> uint32s = new HashMap<Long, byte[]>();
+        Map<Long, byte[]> uint32s = new HashMap<>();
 
         uint32s.put((long) 0, new byte[]{(byte) 0xc0});
         uint32s.put((long) ((1 << 8) - 1), new byte[]{(byte) 0xc1,
@@ -76,7 +77,7 @@ public class DecoderTest {
     private static Map<Integer, byte[]> uint16() {
         int max = (1 << 16) - 1;
 
-        Map<Integer, byte[]> uint16s = new HashMap<Integer, byte[]>();
+        Map<Integer, byte[]> uint16s = new HashMap<>();
 
         uint16s.put(0, new byte[]{(byte) 0xa0});
         uint16s.put((1 << 8) - 1, new byte[]{(byte) 0xa1, (byte) 0xff});
@@ -87,7 +88,7 @@ public class DecoderTest {
     }
 
     private static Map<BigInteger, byte[]> largeUint(int bits) {
-        Map<BigInteger, byte[]> uints = new HashMap<BigInteger, byte[]>();
+        Map<BigInteger, byte[]> uints = new HashMap<>();
 
         byte ctrlByte = (byte) (bits == 64 ? 0x2 : 0x3);
 
@@ -115,7 +116,7 @@ public class DecoderTest {
     }
 
     private static Map<Long, byte[]> pointers() {
-        Map<Long, byte[]> pointers = new HashMap<Long, byte[]>();
+        Map<Long, byte[]> pointers = new HashMap<>();
 
         pointers.put((long) 0, new byte[]{0x20, 0x0});
         pointers.put((long) 5, new byte[]{0x20, 0x5});
@@ -138,7 +139,7 @@ public class DecoderTest {
     }
 
     private static Map<String, byte[]> strings() {
-        Map<String, byte[]> strings = new HashMap<String, byte[]>();
+        Map<String, byte[]> strings = new HashMap<>();
 
         DecoderTest.addTestString(strings, (byte) 0x40, "");
         DecoderTest.addTestString(strings, (byte) 0x41, "1");
@@ -170,15 +171,15 @@ public class DecoderTest {
     }
 
     private static Map<byte[], byte[]> bytes() {
-        Map<byte[], byte[]> bytes = new HashMap<byte[], byte[]>();
+        Map<byte[], byte[]> bytes = new HashMap<>();
 
         Map<String, byte[]> strings = DecoderTest.strings();
 
-        for (String s : strings.keySet()) {
-            byte[] ba = strings.get(s);
+        for (Entry<String, byte[]> stringEntry : strings.entrySet()) {
+            byte[] ba = stringEntry.getValue();
             ba[0] ^= 0xc0;
 
-            bytes.put(s.getBytes(Charset.forName("UTF-8")), ba);
+            bytes.put((stringEntry.getKey()).getBytes(Charset.forName("UTF-8")), ba);
         }
 
         return bytes;
@@ -187,7 +188,7 @@ public class DecoderTest {
     private static String xString(int length) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            sb.append("x");
+            sb.append('x');
         }
         return sb.toString();
     }
@@ -209,7 +210,7 @@ public class DecoderTest {
     }
 
     private static Map<Double, byte[]> doubles() {
-        Map<Double, byte[]> doubles = new HashMap<Double, byte[]>();
+        Map<Double, byte[]> doubles = new HashMap<>();
         doubles.put(0.0, new byte[]{0x68, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                 0x0});
         doubles.put(0.5, new byte[]{0x68, 0x3F, (byte) 0xE0, 0x0, 0x0, 0x0,
@@ -231,7 +232,7 @@ public class DecoderTest {
     }
 
     private static Map<Float, byte[]> floats() {
-        Map<Float, byte[]> floats = new HashMap<Float, byte[]>();
+        Map<Float, byte[]> floats = new HashMap<>();
         floats.put((float) 0.0, new byte[]{0x4, 0x8, 0x0, 0x0, 0x0, 0x0});
         floats.put((float) 1.0, new byte[]{0x4, 0x8, 0x3F, (byte) 0x80, 0x0,
                 0x0});
@@ -254,7 +255,7 @@ public class DecoderTest {
     }
 
     private static Map<Boolean, byte[]> booleans() {
-        Map<Boolean, byte[]> booleans = new HashMap<Boolean, byte[]>();
+        Map<Boolean, byte[]> booleans = new HashMap<>();
 
         booleans.put(Boolean.FALSE, new byte[]{0x0, 0x7});
         booleans.put(Boolean.TRUE, new byte[]{0x1, 0x7});
@@ -425,29 +426,40 @@ public class DecoderTest {
                 decoder.POINTER_TEST_HACK = true;
 
                 // XXX - this could be streamlined
-                if (type.equals(Decoder.Type.BYTES)) {
-                    assertArrayEquals(desc, (byte[]) expect, ReaderTest.toByteArray((JsonArray) decoder.decode(0)));
-                } else if (type.equals(Decoder.Type.ARRAY)) {
-                    assertEquals(desc, expect, decoder.decode(0));
-                } else if (type.equals(Decoder.Type.UINT16)
-                        || type.equals(Decoder.Type.INT32)) {
-                    assertEquals(desc, expect, decoder.decode(0).getAsInt());
-                } else if (type.equals(Decoder.Type.UINT32)
-                        || type.equals(Decoder.Type.POINTER)) {
-                    assertEquals(desc, expect, decoder.decode(0).getAsLong());
-                } else if (type.equals(Decoder.Type.UINT64)
-                        || type.equals(Decoder.Type.UINT128)) {
-                    assertEquals(desc, expect, decoder.decode(0).getAsBigInteger());
-                } else if (type.equals(Decoder.Type.DOUBLE)) {
-                    assertEquals(desc, expect, decoder.decode(0).getAsDouble());
-                } else if (type.equals(Decoder.Type.FLOAT)) {
-                    assertEquals(desc, new JsonPrimitive((Float) expect), decoder.decode(0));
-                } else if (type.equals(Decoder.Type.UTF8_STRING)) {
-                    assertEquals(desc, expect, decoder.decode(0).getAsString());
-                } else if (type.equals(Decoder.Type.BOOLEAN)) {
-                    assertEquals(desc, expect, decoder.decode(0).getAsBoolean());
-                } else {
-                    assertEquals(desc, expect, decoder.decode(0));
+                switch (type) {
+                    case BYTES:
+                        assertArrayEquals(desc, (byte[]) expect, ReaderTest.toByteArray((JsonArray) decoder.decode(0)));
+                        break;
+                    case ARRAY:
+                        assertEquals(desc, expect, decoder.decode(0));
+                        break;
+                    case UINT16:
+                    case INT32:
+                        assertEquals(desc, expect, decoder.decode(0).getAsInt());
+                        break;
+                    case UINT32:
+                    case POINTER:
+                        assertEquals(desc, expect, decoder.decode(0).getAsLong());
+                        break;
+                    case UINT64:
+                    case UINT128:
+                        assertEquals(desc, expect, decoder.decode(0).getAsBigInteger());
+                        break;
+                    case DOUBLE:
+                        assertEquals(desc, expect, decoder.decode(0).getAsDouble());
+                        break;
+                    case FLOAT:
+                        assertEquals(desc, new JsonPrimitive((Float) expect), decoder.decode(0));
+                        break;
+                    case UTF8_STRING:
+                        assertEquals(desc, expect, decoder.decode(0).getAsString());
+                        break;
+                    case BOOLEAN:
+                        assertEquals(desc, expect, decoder.decode(0).getAsBoolean());
+                        break;
+                    default:
+                        assertEquals(desc, expect, decoder.decode(0));
+                        break;
                 }
             } finally {
                 fc.close();

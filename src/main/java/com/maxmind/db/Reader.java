@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Instances of this class provide a reader for the MaxMind DB format. IP
- * addresses can be looked up using the <code>get</code> method.
+ * addresses can be looked up using the {@code get} method.
  */
 public final class Reader implements Closeable {
     private static final int DATA_SECTION_SEPARATOR_SIZE = 16;
@@ -69,7 +69,7 @@ public final class Reader implements Closeable {
 
     /**
      * Constructs a Reader with no caching, as if in mode
-     * {@link FileMode#MEMORY}, without using a <code>File</code> instance.
+     * {@link FileMode#MEMORY}, without using a {@code File} instance.
      *
      * @param source the InputStream that contains the MaxMind DB file.
      * @throws IOException if there is an error reading from the Stream.
@@ -80,7 +80,7 @@ public final class Reader implements Closeable {
 
     /**
      * Constructs a Reader with the specified backing cache, as if in mode
-     * {@link FileMode#MEMORY}, without using a <code>File</code> instance.
+     * {@link FileMode#MEMORY}, without using a {@code File} instance.
      *
      * @param source the InputStream that contains the MaxMind DB file.
      * @param cache backing cache instance
@@ -136,7 +136,7 @@ public final class Reader implements Closeable {
     }
 
     /**
-     * Looks up the <code>address</code> in the MaxMind DB.
+     * Looks up the {@code address} in the MaxMind DB.
      *
      * @param ipAddress the IP address to look up.
      * @return the record for the IP address.
@@ -294,10 +294,10 @@ public final class Reader implements Closeable {
      * Closes the database.
      * </p>
      * <p>
-     * If you are using <code>FileMode.MEMORY_MAPPED</code>, this will
+     * If you are using {@code FileMode.MEMORY_MAPPED}, this will
      * <em>not</em> unmap the underlying file due to a limitation in Java's
-     * <code>MappedByteBuffer</code>. It will however set the reference to
-     * the buffer to <code>null</code>, allowing the garbage collector to
+     * {@code MappedByteBuffer}. It will however set the reference to
+     * the buffer to {@code null}, allowing the garbage collector to
      * collect it.
      * </p>
      *
