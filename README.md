@@ -1,5 +1,11 @@
 # MaxMind DB Reader #
 
+## About this fork ##
+
+Some projects that are using MaxMind's GEO-IP service already have a GSON included. This project replaces the dependency
+of Jackson, an alternative library for JSON, in order to remove the requirement of including the huge Jackson (1.3 MB)
+dependency too.
+
 ## Description ##
 
 This is the Java API for reading MaxMind DB files. MaxMind DB is a binary file
@@ -9,16 +15,18 @@ format that stores data indexed by IP address subnets (IPv4 or IPv6).
 
 ### Maven ###
 
-We recommend installing this package with [Maven](http://maven.apache.org/).
+We recommend installing this package with [Maven](https://maven.apache.org/).
 To do this, add the dependency to your pom.xml:
 
 ```xml
     <dependency>
         <groupId>com.maxmind.db</groupId>
         <artifactId>maxmind-db</artifactId>
-        <version>1.2.2</version>
+        <version>2.0-SNAPSHOT</version>
     </dependency>
 ```
+
+Please note that this is an experimental project and therefore isn't available from the official repositories.
 
 ### Gradle ###
 
@@ -29,15 +37,11 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    compile 'com.maxmind.db:maxmind-db:1.2.2'
+    compile 'com.maxmind.db:maxmind-db:2.0-SNAPSHOT'
 }
 ```
 
 ## Usage ##
-
-*Note:* For accessing MaxMind GeoIP2 databases, we generally recommend using
-the [GeoIP2 Java API](http://maxmind.github.io/GeoIP2-java/) rather than using
-this package directly.
 
 To use the API, you must first create a `Reader` object. The constructor for
 the reader object takes a `File` representing your MaxMind DB. Optionally you
@@ -48,10 +52,11 @@ real memory with `MEMORY`.
 
 To look up an IP address, pass the address as an `InetAddress` to the `get`
 method on `Reader`. This method will return the result as a
-`com.fasterxml.jackson.databind.JsonNode` object. `JsonNode` objects are used
-as they provide a convenient representation of multi-type data structures and
-the databind package of Jackson 2 supplies many tools for interacting with the
-data in this format.
+`com.google.gson.JsonElement` object. `JsonElement` objects are used
+as they provide a convenient representation of multi-type data structures and gson 
+supplies many tools for interacting with the data in this format. 
+
+**You might have to cast the JsonElement to JsonObject in order to access all necessary data.**
 
 We recommend reusing the `Reader` object rather than creating a new one for
 each lookup. The creation of this object is relatively expensive as it must
@@ -65,7 +70,7 @@ Reader reader = new Reader(database);
 
 InetAddress address = InetAddress.getByName("24.24.24.24");
 
-JsonNode response = reader.get(address);
+JsonElement response = reader.get(address);
 
 System.out.println(response);
 
@@ -110,7 +115,7 @@ version. You may also call `System.gc()` after dereferencing the
 
 If you are packaging the database file as a resource in a JAR file using
 Maven, you must
-[disable binary file filtering](http://maven.apache.org/plugins/maven-resources-plugin/examples/binaries-filtering.html).
+[disable binary file filtering](https://maven.apache.org/plugins/maven-resources-plugin/examples/binaries-filtering.html).
 Failure to do so will result in `InvalidDatabaseException` exceptions being
 thrown when querying the database.
 
@@ -126,20 +131,19 @@ format.
 ## Bug Tracker ##
 
 Please report all issues with this code using the [GitHub issue tracker]
-(https://github.com/maxmind/MaxMind-DB-Reader-java/issues).
+(https://github.com/games647/MaxMind-DB-Reader-java/issues).
 
 If you are having an issue with a MaxMind database or service that is not
 specific to this reader, please [contact MaxMind support]
-(http://www.maxmind.com/en/support).
+(https://www.maxmind.com/en/support).
 
 ## Requirements  ##
 
-MaxMind has tested this API with Java 6 and above.
+Java 7+
 
 ## Contributing ##
 
-Patches and pull requests are encouraged. Please include unit tests whenever
-possible.
+Patches and pull requests are encouraged. Please include unit tests whenever possible.
 
 ## Versioning ##
 
