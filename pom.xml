@@ -5,23 +5,23 @@
 
     <groupId>com.maxmind.db</groupId>
     <artifactId>maxmind-db</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>2.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>MaxMind DB Reader</name>
-    <description>Reader for MaxMind DB</description>
-    <url>http://dev.maxmind.com/</url>
+    <name>MaxMind DB Reader (GSON)</name>
+    <description>(GSON variant of:) Reader for MaxMind DB</description>
+    <url>https://dev.maxmind.com/</url>
 
     <licenses>
         <license>
             <name>Apache License 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.html</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
 
     <organization>
         <name>MaxMind, Inc.</name>
-        <url>http://www.maxmind.com/</url>
+        <url>https://www.maxmind.com/</url>
     </organization>
 
     <scm>
@@ -82,46 +82,6 @@
                     <source>1.7</source>
                     <target>1.7</target>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.eluder.coveralls</groupId>
-                <artifactId>coveralls-maven-plugin</artifactId>
-                <version>4.3.0</version>
-                <configuration>
-                    <serviceName>travis-ci</serviceName>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <format>xml</format>
-                    <maxmem>256m</maxmem>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.1</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <id>invoke build</id>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <executable>git</executable>
-                    <commandlineArgs>submodule update --init --recursive</commandlineArgs>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>2.2</version>
             </plugin>
         </plugins>
     </build>

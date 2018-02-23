@@ -256,7 +256,6 @@ public class ReaderTest {
     }
 
     private void testMetadata(Reader reader, int ipVersion, long recordSize) {
-
         Metadata metadata = reader.getMetadata();
 
         assertEquals("major version", 2, metadata.getBinaryFormatMajorVersion());
@@ -282,7 +281,6 @@ public class ReaderTest {
     }
 
     private void testIpV4(Reader reader, File file) throws IOException {
-
         for (int i = 0; i <= 5; i++) {
             String address = "1.1.1." + (int) Math.pow(2, i);
             JsonObject data = new JsonObject();
