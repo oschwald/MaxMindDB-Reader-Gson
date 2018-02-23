@@ -1,5 +1,8 @@
 package com.maxmind.db.model;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 /**
  * <p>
  * Contains data for the continent record associated with an IP address.
@@ -20,6 +23,14 @@ public class Continent extends AbstractRecord {
         super(name, geoNameId);
 
         this.code = code;
+    }
+
+    public static Continent of(JsonElement jsonElement) {
+        JsonObject continentJson = jsonElement.getAsJsonObject();
+        int geoNameId = continentJson.getAsJsonPrimitive("geoname_id").getAsInt();
+        String code = continentJson.getAsJsonPrimitive("code").getAsString();
+        String continentName = continentJson.getAsJsonObject("names").get("en").getAsString();
+        return new Continent(continentName, geoNameId, code);
     }
 
     /**

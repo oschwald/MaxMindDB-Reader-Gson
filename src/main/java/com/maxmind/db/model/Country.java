@@ -1,5 +1,8 @@
 package com.maxmind.db.model;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 /**
  * <p>
  * Contains data for the country record associated with an IP address.
@@ -22,6 +25,14 @@ public class Country extends AbstractRecord {
 
         this.isoCode = isoCode;
         this.geoNameId = geoNameId;
+    }
+
+    public static Country of(JsonElement jsonElement) {
+        JsonObject countryJson = jsonElement.getAsJsonObject();
+        int countryGeoName = countryJson.getAsJsonPrimitive("geoname_id").getAsInt();
+        String isoCode = countryJson.getAsJsonPrimitive("iso_code").getAsString();
+        String countryName = countryJson.getAsJsonObject("names").get("en").getAsString();
+        return new Country(isoCode, countryGeoName, countryName);
     }
 
     /**

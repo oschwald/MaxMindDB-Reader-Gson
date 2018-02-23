@@ -20,18 +20,8 @@ public class CountryResponse {
     public static CountryResponse of(JsonElement jsonElement) {
         JsonObject response = jsonElement.getAsJsonObject();
 
-        JsonObject countryJson = response.getAsJsonObject("country");
-        int countryGeoName = countryJson.getAsJsonPrimitive("geoname_id").getAsInt();
-        String isoCode = countryJson.getAsJsonPrimitive("iso_code").getAsString();
-        String countryName = countryJson.getAsJsonObject("names").get("en").getAsString();
-        Country country = new Country(isoCode, countryGeoName, countryName);
-
-        JsonObject contigentJson = response.getAsJsonObject("continent");
-        int geoNameId = contigentJson.getAsJsonPrimitive("geoname_id").getAsInt();
-        String code = contigentJson.getAsJsonPrimitive("code").getAsString();
-        String continentName = countryJson.getAsJsonObject("names").get("en").getAsString();
-        Continent continent = new Continent(continentName, geoNameId, code);
-
+        Country country = Country.of(response.get("country"));
+        Continent continent = Continent.of(response.get("continent"));
         return new CountryResponse(country, continent);
     }
 

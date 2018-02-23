@@ -1,0 +1,44 @@
+{
+  "continent": {
+    "code": "NA",
+    "names": {
+      "de": "Nordamerika",
+      "ru": "Северная Америка",
+      "pt-BR": "América do Norte",
+      "ja": "北アメリカ",
+      "en": "North America",
+      "fr": "Amérique du Nord",
+      "zh-CN": "北美洲",
+      "es": "Norteamérica"
+    },
+    "geoname_id": 6255149
+  },
+  "country": {
+    "names": {
+      "de": "USA",
+      "ru": "США",
+      "pt-BR": "Estados Unidos",
+      "ja": "アメリカ合衆国",
+      "en": "United States",
+      "fr": "États-Unis",
+      "zh-CN": "美国",
+      "es": "Estados Unidos"
+    },
+    "iso_code": "US",
+    "geoname_id": 6252001
+  },
+  "registered_country": {
+    "names": {
+      "de": "USA",
+      "ru": "США",
+      "pt-BR": "Estados Unidos",
+      "ja": "アメリカ合衆国",
+      "en": "United States",
+      "fr": "États-Unis",
+      "zh-CN": "美国",
+      "es": "Estados Unidos"
+    },
+    "iso_code": "US",
+    "geoname_id": 6252001
+  }
+}
