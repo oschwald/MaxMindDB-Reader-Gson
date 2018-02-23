@@ -2,6 +2,9 @@ package com.maxmind.db;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.maxmind.db.cache.NoCache;
+import com.maxmind.db.cache.NodeCache;
+import com.maxmind.db.model.CountryResponse;
 
 import java.io.Closeable;
 import java.io.File;
@@ -149,6 +152,20 @@ public final class Reader implements Closeable {
             return null;
         }
         return this.resolveDataPointer(buffer, pointer);
+    }
+
+    /**
+     * @param ipAddress IPv4 or IPv6 address to lookup.
+     * @return A Country model for the requested IP address.
+     * @throws IOException     if there is an IO error
+     */
+    public CountryResponse getCountry(InetAddress ipAddress) throws IOException {
+        JsonElement jsonElement = get(ipAddress);
+        if (jsonElement == null) {
+            return null;
+        }
+
+        return CountryResponse.of(jsonElement);
     }
 
     private BufferHolder getBufferHolder() throws ClosedDatabaseException {

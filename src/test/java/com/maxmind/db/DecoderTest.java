@@ -3,6 +3,8 @@ package com.maxmind.db;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.maxmind.db.cache.CHMCache;
+import com.maxmind.db.cache.NodeCache;
 
 import java.io.File;
 import java.io.IOException;

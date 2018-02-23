@@ -2,6 +2,7 @@ package com.maxmind.db;
 
 import com.google.gson.JsonObject;
 import com.maxmind.db.Reader.FileMode;
+import com.maxmind.db.cache.NoCache;
 
 import java.io.File;
 import java.io.IOException;
