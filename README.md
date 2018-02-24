@@ -19,6 +19,11 @@ We recommend installing this package with [Maven](https://maven.apache.org/).
 To do this, add the dependency to your pom.xml:
 
 ```xml
+    <repository>
+        <name>jitpack.io</name>
+        <url>https://jitpack.io/</url>
+    </repository>
+
     <dependency>
         <groupId>com.maxmind.db</groupId>
         <artifactId>maxmind-db</artifactId>
@@ -34,8 +39,12 @@ Add the following to your `build.gradle` file:
 
 ```
 repositories {
-    mavenCentral()
+    maven {
+        name = 'jitpack.io'
+        url = 'https://jitpack.io/'
+    }
 }
+
 dependencies {
     compile 'com.maxmind.db:maxmind-db:2.0-SNAPSHOT'
 }
@@ -71,7 +80,20 @@ Reader reader = new Reader(database);
 InetAddress address = InetAddress.getByName("24.24.24.24");
 
 JsonElement response = reader.get(address);
+System.out.println(response);
 
+reader.close();
+```
+
+## Example for country ##
+
+```java
+File database = new File("/path/to/database/GeoIP2-City.mmdb");
+Reader reader = new Reader(database);
+
+InetAddress address = InetAddress.getByName("24.24.24.24");
+
+CountryResponse response = reader.getCountry(address);
 System.out.println(response);
 
 reader.close();
