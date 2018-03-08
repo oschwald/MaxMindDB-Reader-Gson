@@ -1,5 +1,7 @@
 package com.maxmind.db.model;
 
+import java.util.Objects;
+
 /**
  * Abstract class for records with name maps.
  */
@@ -24,6 +26,25 @@ public abstract class AbstractRecord {
      * @return The GeoName ID for this record. This attribute is returned by all end points.
      */
     public Integer getGeoNameId() {
+        return geoNameId;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (other instanceof AbstractRecord) {
+            AbstractRecord that = (AbstractRecord) other;
+            return Objects.equals(geoNameId, that.geoNameId);
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
         return geoNameId;
     }
 
