@@ -2,9 +2,10 @@
 
 ## About this fork ##
 
-Some projects that are using MaxMind's GEO-IP service already have a GSON included. This project replaces the dependency
-of Jackson, an alternative library for JSON, in order to remove the requirement of including the huge Jackson (1.3 MB)
-dependency too.
+Some projects that are using MaxMind's GEO-IP service already have GSON included. This project replaces the Jackson
+dependency, an alternative library for JSON, in order to remove the requirement of including the huge library (1.3 MB).
+
+Keep in mind that Jackson is faster.
 
 ## Description ##
 

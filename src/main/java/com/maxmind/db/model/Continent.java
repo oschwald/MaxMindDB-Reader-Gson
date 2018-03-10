@@ -27,6 +27,7 @@ public class Continent extends AbstractRecord {
 
     public static Continent of(JsonElement jsonElement) {
         JsonObject continentJson = jsonElement.getAsJsonObject();
+
         int geoNameId = continentJson.getAsJsonPrimitive("geoname_id").getAsInt();
         String code = continentJson.getAsJsonPrimitive("code").getAsString();
         String continentName = continentJson.getAsJsonObject("names").get("en").getAsString();

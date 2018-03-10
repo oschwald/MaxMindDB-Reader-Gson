@@ -29,6 +29,7 @@ public class Country extends AbstractRecord {
 
     public static Country of(JsonElement jsonElement) {
         JsonObject countryJson = jsonElement.getAsJsonObject();
+
         int countryGeoName = countryJson.getAsJsonPrimitive("geoname_id").getAsInt();
         String isoCode = countryJson.getAsJsonPrimitive("iso_code").getAsString();
         String countryName = countryJson.getAsJsonObject("names").get("en").getAsString();

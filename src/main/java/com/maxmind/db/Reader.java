@@ -121,12 +121,12 @@ public final class Reader implements Closeable {
     }
 
     private Reader(BufferHolder bufferHolder, String name, NodeCache cache) throws IOException {
-        this.bufferHolderReference = new AtomicReference<>(
-                bufferHolder);
+        this.bufferHolderReference = new AtomicReference<>(bufferHolder);
 
         if (cache == null) {
             throw new NullPointerException("Cache cannot be null");
         }
+
         this.cache = cache;
 
         ByteBuffer buffer = bufferHolder.get();
