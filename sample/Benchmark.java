@@ -1,15 +1,15 @@
+import com.google.gson.JsonElement;
+import com.maxmind.db.InvalidDatabaseException;
+import com.maxmind.db.Reader;
+import com.maxmind.db.Reader.FileMode;
+import com.maxmind.db.cache.CHMCache;
+import com.maxmind.db.cache.NoCache;
+import com.maxmind.db.cache.NodeCache;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Random;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.maxmind.db.CHMCache;
-import com.maxmind.db.InvalidDatabaseException;
-import com.maxmind.db.NoCache;
-import com.maxmind.db.NodeCache;
-import com.maxmind.db.Reader;
-import com.maxmind.db.Reader.FileMode;
 
 public class Benchmark {
 
@@ -45,7 +45,7 @@ public class Benchmark {
         for (int i = 0; i < count; i++) {
             random.nextBytes(address);
             InetAddress ip = InetAddress.getByAddress(address);
-            JsonNode t = r.get(ip);
+            JsonElement t = r.get(ip);
             if (TRACE) {
                 if (i % 50000 == 0) {
                     System.out.println(i + " " + ip);
