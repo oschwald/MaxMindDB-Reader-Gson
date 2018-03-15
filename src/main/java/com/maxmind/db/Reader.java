@@ -18,7 +18,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * Instances of this class provide a reader for the MaxMind DB format. IP
  * addresses can be looked up using the {@code get} method.
  */
-public final class Reader implements Closeable {
+public class Reader implements GeoIp2Provider, Closeable {
+
     private static final int DATA_SECTION_SEPARATOR_SIZE = 16;
     private static final byte[] METADATA_START_MARKER = {(byte) 0xAB,
             (byte) 0xCD, (byte) 0xEF, 'M', 'a', 'x', 'M', 'i', 'n', 'd', '.',
@@ -138,13 +139,7 @@ public final class Reader implements Closeable {
         this.ipV4Start = this.findIpV4StartNode(buffer);
     }
 
-    /**
-     * Looks up the {@code address} in the MaxMind DB.
-     *
-     * @param ipAddress the IP address to look up.
-     * @return the record for the IP address.
-     * @throws IOException if a file I/O error occurs.
-     */
+    @Override
     public JsonElement get(InetAddress ipAddress) throws IOException {
         ByteBuffer buffer = this.getBufferHolder().get();
         int pointer = this.findAddressInTree(buffer, ipAddress);
@@ -154,11 +149,7 @@ public final class Reader implements Closeable {
         return this.resolveDataPointer(buffer, pointer);
     }
 
-    /**
-     * @param ipAddress IPv4 or IPv6 address to lookup.
-     * @return A Country model for the requested IP address.
-     * @throws IOException     if there is an IO error
-     */
+    @Override
     public CountryResponse getCountry(InetAddress ipAddress) throws IOException {
         JsonElement jsonElement = get(ipAddress);
         if (jsonElement == null) {
@@ -298,9 +289,7 @@ public final class Reader implements Closeable {
                         + databaseName + "). Is this a valid MaxMind DB file?");
     }
 
-    /**
-     * @return the metadata for the MaxMind DB file.
-     */
+    @Override
     public Metadata getMetadata() {
         return this.metadata;
     }
