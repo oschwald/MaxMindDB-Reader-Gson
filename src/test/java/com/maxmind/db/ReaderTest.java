@@ -2,12 +2,18 @@ package com.maxmind.db;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -16,15 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import static org.hamcrest.CoreMatchers.containsString;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class ReaderTest {
 
@@ -46,7 +50,7 @@ public class ReaderTest {
     public void test() throws IOException {
         for (long recordSize : new long[]{24, 28, 32}) {
             for (int ipVersion : new int[]{4, 6}) {
-                File file = getFile("MaxMind-DB-test-ipv" + ipVersion + '-' + recordSize + ".mmdb");
+                File file = getFile("MaxMind-DB-test-ipv" + ipVersion + "-" + recordSize + ".mmdb");
                 try (Reader reader = new Reader(file)) {
                     this.testMetadata(reader, ipVersion, recordSize);
                     if (ipVersion == 4) {
@@ -58,6 +62,52 @@ public class ReaderTest {
             }
         }
     }
+
+    class GetRecordTest {
+        InetAddress ip;
+        File db;
+        String network;
+        boolean hasRecord;
+
+        GetRecordTest(String ip, String file, String network, boolean hasRecord) throws UnknownHostException {
+            this.ip = InetAddress.getByName(ip);
+            db = getFile(file);
+            this.network = network;
+            this.hasRecord = hasRecord;
+        }
+    }
+
+    @Test
+    public void testGetRecord() throws IOException {
+        GetRecordTest[] tests = {
+                new GetRecordTest("1.1.1.1", "MaxMind-DB-test-ipv6-32.mmdb", "1.0.0.0/8", false),
+                new GetRecordTest("::1:ffff:ffff", "MaxMind-DB-test-ipv6-24.mmdb", "0:0:0:0:0:1:ffff:ffff/128", true),
+                new GetRecordTest("::2:0:1", "MaxMind-DB-test-ipv6-24.mmdb", "0:0:0:0:0:2:0:0/122", true),
+                new GetRecordTest("1.1.1.1", "MaxMind-DB-test-ipv4-24.mmdb", "1.1.1.1/32", true),
+                new GetRecordTest("1.1.1.3", "MaxMind-DB-test-ipv4-24.mmdb", "1.1.1.2/31", true),
+                new GetRecordTest("1.1.1.3", "MaxMind-DB-test-decoder.mmdb", "1.1.1.0/24", true),
+                new GetRecordTest("::ffff:1.1.1.128", "MaxMind-DB-test-decoder.mmdb", "1.1.1.0/24", true),
+                new GetRecordTest("::1.1.1.128", "MaxMind-DB-test-decoder.mmdb", "0:0:0:0:0:0:101:100/120", true),
+                new GetRecordTest("200.0.2.1", "MaxMind-DB-no-ipv4-search-tree.mmdb", "0.0.0.0/0", true),
+                new GetRecordTest("::200.0.2.1", "MaxMind-DB-no-ipv4-search-tree.mmdb", "0:0:0:0:0:0:0:0/64", true),
+                new GetRecordTest("0:0:0:0:ffff:ffff:ffff:ffff", "MaxMind-DB-no-ipv4-search-tree.mmdb", "0:0:0:0:0:0:0:0/64", true),
+                new GetRecordTest("ef00::", "MaxMind-DB-no-ipv4-search-tree.mmdb", "8000:0:0:0:0:0:0:0/1", false)
+        };
+        for (GetRecordTest test : tests) {
+            try (Reader reader = new Reader(test.db)) {
+                Record record = reader.getRecord(test.ip);
+
+                assertEquals(test.network, record.getNetwork().toString());
+
+                if (test.hasRecord) {
+                    assertNotNull(record.getData());
+                } else {
+                    assertNull(record.getData());
+                }
+            }
+        }
+    }
+
 
     @Test
     public void testNoIpV4SearchTreeFile() throws IOException {
@@ -73,7 +123,8 @@ public class ReaderTest {
 
     private void testNoIpV4SearchTree(Reader reader) throws IOException {
 
-        assertEquals("::0/64", reader.get(InetAddress.getByName("1.1.1.1")).getAsString());
+        assertEquals("::0/64", reader.get(InetAddress.getByName("1.1.1.1"))
+                .getAsString());
         assertEquals("::0/64", reader.get(InetAddress.getByName("192.1.1.1"))
                 .getAsString());
     }
@@ -256,6 +307,7 @@ public class ReaderTest {
     }
 
     private void testMetadata(Reader reader, int ipVersion, long recordSize) {
+
         Metadata metadata = reader.getMetadata();
 
         assertEquals("major version", 2, metadata.getBinaryFormatMajorVersion());
@@ -281,6 +333,7 @@ public class ReaderTest {
     }
 
     private void testIpV4(Reader reader, File file) throws IOException {
+
         for (int i = 0; i <= 5; i++) {
             String address = "1.1.1." + (int) Math.pow(2, i);
             JsonObject data = new JsonObject();

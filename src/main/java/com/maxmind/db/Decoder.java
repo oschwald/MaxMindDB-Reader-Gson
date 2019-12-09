@@ -24,13 +24,13 @@ final class Decoder {
 
     private static final Charset UTF_8 = StandardCharsets.UTF_8;
 
-    private static final Gson objectmapper = new Gson();
+    private static final Gson OBJECT_MAPPER = new Gson();
 
     private static final int[] POINTER_VALUE_OFFSETS = { 0, 0, 1 << 11, (1 << 19) + ((1) << 11), 0 };
 
     // XXX - This is only for unit testings. We should possibly make a
     // constructor to set this
-    boolean POINTER_TEST_HACK;
+    boolean POINTER_TEST_HACK = false;
 
     private final NodeCache cache;
 
@@ -40,14 +40,14 @@ final class Decoder {
 
     private final ByteBuffer buffer;
 
-    static enum Type {
+    enum Type {
         EXTENDED, POINTER, UTF8_STRING, DOUBLE, BYTES, UINT16, UINT32, MAP, INT32, UINT64, UINT128, ARRAY, CONTAINER, END_MARKER, BOOLEAN, FLOAT;
 
         // Java clones the array when you call values(). Caching it increased
         // the speed by about 5000 requests per second on my machine.
-        static final Type[] values = Type.values();
+        final static Type[] values = Type.values();
 
-        public static Type get(int i) {
+        static Type get(int i) {
             return Type.values[i];
         }
 
@@ -56,7 +56,7 @@ final class Decoder {
             return Type.get(b & 0xFF);
         }
 
-        public static Type fromControlByte(int b) {
+        static Type fromControlByte(int b) {
             // The type is encoded in the first 3 bits of the byte.
             return Type.get((byte) ((0xFF & b) >>> 5));
         }
@@ -86,7 +86,7 @@ final class Decoder {
         return decode();
     }
 
-    JsonElement decode() throws IOException {
+    private JsonElement decode() throws IOException {
         int ctrlByte = 0xFF & this.buffer.get();
 
         Type type = Type.fromControlByte(ctrlByte);
@@ -121,7 +121,7 @@ final class Decoder {
                 throw new InvalidDatabaseException(
                         "Something went horribly wrong in the decoder. An extended type "
                                 + "resolved to a type number < 8 (" + typeNum
-                                + ')');
+                                + ")");
             }
 
             type = Type.get(typeNum);
@@ -162,7 +162,7 @@ final class Decoder {
             case FLOAT:
                 return this.decodeFloat(size);
             case BYTES:
-                return objectmapper.toJsonTree(getByteArray(size));
+                return OBJECT_MAPPER.toJsonTree(getByteArray(size));
             case UINT16:
                 return this.decodeUint16(size);
             case UINT32:
@@ -170,7 +170,6 @@ final class Decoder {
             case INT32:
                 return this.decodeInt32(size);
             case UINT64:
-                return this.decodeBigInteger(size);
             case UINT128:
                 return this.decodeBigInteger(size);
             default:
