@@ -81,22 +81,8 @@ try (Reader reader = new Reader(database)) {
 
     InetAddress address = InetAddress.getByName("24.24.24.24");
 
-JsonElement response = reader.get(address);
-System.out.println(response);
-
-reader.close();
-```
-
-## Example for country ##
-
-```java
-File database = new File("/path/to/database/GeoIP2-City.mmdb");
-Reader reader = new Reader(database);
-
-InetAddress address = InetAddress.getByName("24.24.24.24");
-
-CountryResponse response = reader.getCountry(address);
-System.out.println(response);
+    JsonElement response = reader.get(address);
+    System.out.println(response);
 
     // getRecord() returns a Record class that contains both
     // the data for the record and associated metadata.
@@ -104,6 +90,19 @@ System.out.println(response);
 
     System.out.println(record.getData());
     System.out.println(record.getNetwork());
+}
+```
+
+## Example for country ##
+
+```java
+File database = new File("/path/to/database/GeoIP2-City.mmdb");
+try (Reader reader = new Reader(database)) {
+
+    InetAddress address = InetAddress.getByName("24.24.24.24");
+
+    CountryResponse response = reader.getCountry(address);
+    System.out.println(response);
 }
 ```
 

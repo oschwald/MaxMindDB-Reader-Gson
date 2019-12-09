@@ -175,7 +175,7 @@ public class Reader implements GeoIp2Provider, Closeable {
             record = this.readNode(buffer, record, bit);
         }
 
-        JsonNode dataRecord = null;
+        JsonElement dataRecord = null;
         if (record > nodeCount) {
             // record is a data pointer
             dataRecord = this.resolveDataPointer(buffer, record);
