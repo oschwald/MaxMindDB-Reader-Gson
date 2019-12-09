@@ -366,7 +366,8 @@ public class ReaderTest {
 
     // XXX - logic could be combined with above
     private void testIpV6(Reader reader, File file) throws IOException {
-        String[] subnets = {"::1:ffff:ffff", "::2:0:0", "::2:0:40", "::2:0:50", "::2:0:58"};
+        String[] subnets = new String[]{"::1:ffff:ffff", "::2:0:0",
+                "::2:0:40", "::2:0:50", "::2:0:58"};
 
         for (String address : subnets) {
             JsonObject data = new JsonObject();

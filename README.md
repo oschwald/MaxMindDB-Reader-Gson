@@ -172,7 +172,8 @@ Java 7+
 
 ## Contributing ##
 
-Patches and pull requests are encouraged. Please include unit tests whenever possible.
+Patches and pull requests are encouraged. Please include unit tests whenever
+possible.
 
 ## Versioning ##
 

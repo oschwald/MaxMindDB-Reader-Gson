@@ -94,7 +94,7 @@ final class Decoder {
         // Pointers are a special case, we don't read the next 'size' bytes, we
         // use the size to determine the length of the pointer and then follow
         // it.
-        if (type == Type.POINTER) {
+        if (type.equals(Type.POINTER)) {
             int pointerSize = ((ctrlByte >>> 3) & 0x3) + 1;
             int base = pointerSize == 4 ? (byte) 0 : (byte) (ctrlByte & 0x7);
             int packed = this.decodeInteger(base, pointerSize);
@@ -112,7 +112,7 @@ final class Decoder {
             return node;
         }
 
-        if (type == Type.EXTENDED) {
+        if (type.equals(Type.EXTENDED)) {
             int nextByte = this.buffer.get();
 
             int typeNum = nextByte + 7;

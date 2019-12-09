@@ -18,7 +18,6 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -176,11 +175,11 @@ public class DecoderTest {
 
         Map<String, byte[]> strings = DecoderTest.strings();
 
-        for (Entry<String, byte[]> stringEntry : strings.entrySet()) {
-            byte[] ba = stringEntry.getValue();
+        for (String s : strings.keySet()) {
+            byte[] ba = strings.get(s);
             ba[0] ^= 0xc0;
 
-            bytes.put((stringEntry.getKey()).getBytes(StandardCharsets.UTF_8), ba);
+            bytes.put(s.getBytes(StandardCharsets.UTF_8), ba);
         }
 
         return bytes;
@@ -189,7 +188,7 @@ public class DecoderTest {
     private static String xString(int length) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            sb.append('x');
+            sb.append("x");
         }
         return sb.toString();
     }
