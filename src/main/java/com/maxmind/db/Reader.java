@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Instances of this class provide a reader for the MaxMind DB format. IP
- * addresses can be looked up using the {@code get} method.
+ * addresses can be looked up using the <code>get</code> method.
  */
 public class Reader implements GeoIp2Provider, Closeable {
 
@@ -73,7 +73,7 @@ public class Reader implements GeoIp2Provider, Closeable {
 
     /**
      * Constructs a Reader with no caching, as if in mode
-     * {@link FileMode#MEMORY}, without using a {@code File} instance.
+     * {@link FileMode#MEMORY}, without using a <code>File</code> instance.
      *
      * @param source the InputStream that contains the MaxMind DB file.
      * @throws IOException if there is an error reading from the Stream.
@@ -84,7 +84,7 @@ public class Reader implements GeoIp2Provider, Closeable {
 
     /**
      * Constructs a Reader with the specified backing cache, as if in mode
-     * {@link FileMode#MEMORY}, without using a {@code File} instance.
+     * {@link FileMode#MEMORY}, without using a <code>File</code> instance.
      *
      * @param source the InputStream that contains the MaxMind DB file.
      * @param cache backing cache instance
@@ -122,12 +122,12 @@ public class Reader implements GeoIp2Provider, Closeable {
     }
 
     private Reader(BufferHolder bufferHolder, String name, NodeCache cache) throws IOException {
-        this.bufferHolderReference = new AtomicReference<>(bufferHolder);
+        this.bufferHolderReference = new AtomicReference<>(
+                bufferHolder);
 
         if (cache == null) {
             throw new NullPointerException("Cache cannot be null");
         }
-
         this.cache = cache;
 
         ByteBuffer buffer = bufferHolder.get();
@@ -139,14 +139,49 @@ public class Reader implements GeoIp2Provider, Closeable {
         this.ipV4Start = this.findIpV4StartNode(buffer);
     }
 
+    /**
+     * Looks up <code>ipAddress</code> in the MaxMind DB.
+     *
+     * @param ipAddress the IP address to look up.
+     * @return the record data for the IP address.
+     * @throws IOException if a file I/O error occurs.
+     */
     @Override
     public JsonElement get(InetAddress ipAddress) throws IOException {
+        return getRecord(ipAddress).getData();
+    }
+    /**
+     * Looks up <code>ipAddress</code> in the MaxMind DB.
+     *
+     * @param ipAddress the IP address to look up.
+     * @return the record for the IP address. If there is no data for the
+     * address, the non-null {@link Record} will still be returned.
+     * @throws IOException if a file I/O error occurs.
+     */
+    public Record getRecord(InetAddress ipAddress)
+            throws IOException {
         ByteBuffer buffer = this.getBufferHolder().get();
-        int pointer = this.findAddressInTree(buffer, ipAddress);
-        if (pointer == 0) {
-            return null;
+
+        byte[] rawAddress = ipAddress.getAddress();
+
+        int bitLength = rawAddress.length * 8;
+        int record = this.startNode(bitLength);
+        int nodeCount = this.metadata.getNodeCount();
+
+        int pl = 0;
+        for (; pl < bitLength && record < nodeCount; pl++) {
+            int b = 0xFF & rawAddress[pl / 8];
+            int bit = 1 & (b >> 7 - (pl % 8));
+            record = this.readNode(buffer, record, bit);
         }
-        return this.resolveDataPointer(buffer, pointer);
+
+        JsonElement dataRecord = null;
+        if (record > nodeCount) {
+            // record is a data pointer
+            dataRecord = this.resolveDataPointer(buffer, record);
+        }
+
+        return new Record(dataRecord, ipAddress, pl);
     }
 
     @Override
@@ -165,31 +200,6 @@ public class Reader implements GeoIp2Provider, Closeable {
             throw new ClosedDatabaseException();
         }
         return bufferHolder;
-    }
-
-    private int findAddressInTree(ByteBuffer buffer, InetAddress address)
-            throws InvalidDatabaseException {
-        byte[] rawAddress = address.getAddress();
-
-        int bitLength = rawAddress.length * 8;
-        int record = this.startNode(bitLength);
-
-        for (int i = 0; i < bitLength; i++) {
-            if (record >= this.metadata.getNodeCount()) {
-                break;
-            }
-            int b = 0xFF & rawAddress[i / 8];
-            int bit = 1 & (b >> 7 - (i % 8));
-            record = this.readNode(buffer, record, bit);
-        }
-        if (record == this.metadata.getNodeCount()) {
-            // record is empty
-            return 0;
-        } else if (record > this.metadata.getNodeCount()) {
-            // record is a data pointer
-            return record;
-        }
-        throw new InvalidDatabaseException("Something bad happened");
     }
 
     private int startNode(int bitLength) {
@@ -300,10 +310,10 @@ public class Reader implements GeoIp2Provider, Closeable {
      * Closes the database.
      * </p>
      * <p>
-     * If you are using {@code FileMode.MEMORY_MAPPED}, this will
+     * If you are using <code>FileMode.MEMORY_MAPPED</code>, this will
      * <em>not</em> unmap the underlying file due to a limitation in Java's
-     * {@code MappedByteBuffer}. It will however set the reference to
-     * the buffer to {@code null}, allowing the garbage collector to
+     * <code>MappedByteBuffer</code>. It will however set the reference to
+     * the buffer to <code>null</code>, allowing the garbage collector to
      * collect it.
      * </p>
      *

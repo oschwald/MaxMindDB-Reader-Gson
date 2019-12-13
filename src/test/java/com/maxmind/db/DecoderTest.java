@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.maxmind.db.cache.CHMCache;
 import com.maxmind.db.cache.NodeCache;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,13 +15,10 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
-
-import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -30,7 +28,7 @@ public class DecoderTest {
 
     private static Map<Integer, byte[]> int32() {
         int max = (2 << 30) - 1;
-        Map<Integer, byte[]> int32 = new HashMap<>();
+        HashMap<Integer, byte[]> int32 = new HashMap<>();
 
         int32.put(0, new byte[]{0x0, 0x1});
         int32.put(-1, new byte[]{0x4, 0x1, (byte) 0xff, (byte) 0xff,
@@ -59,7 +57,7 @@ public class DecoderTest {
 
     private static Map<Long, byte[]> uint32() {
         long max = (((long) 1) << 32) - 1;
-        Map<Long, byte[]> uint32s = new HashMap<>();
+        HashMap<Long, byte[]> uint32s = new HashMap<>();
 
         uint32s.put((long) 0, new byte[]{(byte) 0xc0});
         uint32s.put((long) ((1 << 8) - 1), new byte[]{(byte) 0xc1,
@@ -177,11 +175,11 @@ public class DecoderTest {
 
         Map<String, byte[]> strings = DecoderTest.strings();
 
-        for (Entry<String, byte[]> stringEntry : strings.entrySet()) {
-            byte[] ba = stringEntry.getValue();
+        for (String s : strings.keySet()) {
+            byte[] ba = strings.get(s);
             ba[0] ^= 0xc0;
 
-            bytes.put((stringEntry.getKey()).getBytes(Charset.forName("UTF-8")), ba);
+            bytes.put(s.getBytes(StandardCharsets.UTF_8), ba);
         }
 
         return bytes;
@@ -190,7 +188,7 @@ public class DecoderTest {
     private static String xString(int length) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            sb.append('x');
+            sb.append("x");
         }
         return sb.toString();
     }
@@ -200,10 +198,10 @@ public class DecoderTest {
         DecoderTest.addTestString(tests, new byte[]{ctrl}, str);
     }
 
-    private static void addTestString(Map<String, byte[]> tests, byte ctrl[],
+    private static void addTestString(Map<String, byte[]> tests, byte[] ctrl,
                                       String str) {
 
-        byte[] sb = str.getBytes(Charset.forName("UTF-8"));
+        byte[] sb = str.getBytes(StandardCharsets.UTF_8);
         byte[] bytes = new byte[ctrl.length + sb.length];
 
         System.arraycopy(ctrl, 0, bytes, 0, ctrl.length);

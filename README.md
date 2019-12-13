@@ -1,4 +1,5 @@
 # MaxMind DB Reader #
+[![Build Status](https://travis-ci.org/maxmind/MaxMind-DB-Reader-java.png?branch=master)](https://travis-ci.org/maxmind/MaxMind-DB-Reader-java)
 
 ## About this fork ##
 
@@ -63,8 +64,8 @@ real memory with `MEMORY`.
 To look up an IP address, pass the address as an `InetAddress` to the `get`
 method on `Reader`. This method will return the result as a
 `com.google.gson.JsonElement` object. `JsonElement` objects are used
-as they provide a convenient representation of multi-type data structures and gson 
-supplies many tools for interacting with the data in this format. 
+as they provide a convenient representation of multi-type data structures and gson
+supplies many tools for interacting with the data in this format.
 
 **You might have to cast the JsonElement to JsonObject in order to access all necessary data.**
 
@@ -76,28 +77,33 @@ read in metadata for the file.
 
 ```java
 File database = new File("/path/to/database/GeoIP2-City.mmdb");
-Reader reader = new Reader(database);
+try (Reader reader = new Reader(database)) {
 
-InetAddress address = InetAddress.getByName("24.24.24.24");
+    InetAddress address = InetAddress.getByName("24.24.24.24");
 
-JsonElement response = reader.get(address);
-System.out.println(response);
+    JsonElement response = reader.get(address);
+    System.out.println(response);
 
-reader.close();
+    // getRecord() returns a Record class that contains both
+    // the data for the record and associated metadata.
+    Record record = reader.getRecord(address);
+
+    System.out.println(record.getData());
+    System.out.println(record.getNetwork());
+}
 ```
 
 ## Example for country ##
 
 ```java
 File database = new File("/path/to/database/GeoIP2-City.mmdb");
-Reader reader = new Reader(database);
+try (Reader reader = new Reader(database)) {
 
-InetAddress address = InetAddress.getByName("24.24.24.24");
+    InetAddress address = InetAddress.getByName("24.24.24.24");
 
-CountryResponse response = reader.getCountry(address);
-System.out.println(response);
-
-reader.close();
+    CountryResponse response = reader.getCountry(address);
+    System.out.println(response);
+}
 ```
 
 ### Caching ###
@@ -166,7 +172,8 @@ Java 7+
 
 ## Contributing ##
 
-Patches and pull requests are encouraged. Please include unit tests whenever possible.
+Patches and pull requests are encouraged. Please include unit tests whenever
+possible.
 
 ## Versioning ##
 
