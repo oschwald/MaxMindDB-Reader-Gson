@@ -21,15 +21,16 @@ We recommend installing this package with [Maven](https://maven.apache.org/).
 To do this, add the dependency to your pom.xml:
 
 ```xml
+    <!-- CodeMC -->
     <repository>
-        <name>jitpack.io</name>
-        <url>https://jitpack.io/</url>
+        <id>codemc-repo</id>
+        <url>https://repo.codemc.io/repository/maven-public/</url>
     </repository>
 
     <dependency>
         <groupId>com.maxmind.db</groupId>
-        <artifactId>maxmind-db</artifactId>
-        <version>2.0.2</version>
+        <artifactId>maxmind-db-gson</artifactId>
+        <version>2.0.3</version>
     </dependency>
 ```
 
@@ -42,13 +43,13 @@ Add the following to your `build.gradle` file:
 ```
 repositories {
     maven {
-        name = 'jitpack.io'
-        url = 'https://jitpack.io/'
+        name = 'codemc-repo'
+        url = 'https://repo.codemc.io/repository/maven-public/'
     }
 }
 
 dependencies {
-    compile 'com.maxmind.db:maxmind-db:2.0.2'
+    compile 'com.maxmind.db:maxmind-db-gson:2.0.3'
 }
 ```
 
