@@ -64,7 +64,7 @@ public class Reader implements GeoIp2Provider, Closeable {
      * GeoIP2 database file.
      *
      * @param database the MaxMind DB file to use.
-     * @param cache backing cache instance
+     * @param cache    backing cache instance
      * @throws IOException if there is an error opening or reading from the file.
      */
     public Reader(File database, NodeCache cache) throws IOException {
@@ -87,7 +87,7 @@ public class Reader implements GeoIp2Provider, Closeable {
      * {@link FileMode#MEMORY}, without using a <code>File</code> instance.
      *
      * @param source the InputStream that contains the MaxMind DB file.
-     * @param cache backing cache instance
+     * @param cache  backing cache instance
      * @throws IOException if there is an error reading from the Stream.
      */
     public Reader(InputStream source, NodeCache cache) throws IOException {
@@ -114,7 +114,7 @@ public class Reader implements GeoIp2Provider, Closeable {
      *
      * @param database the MaxMind DB file to use.
      * @param fileMode the mode to open the file with.
-     * @param cache backing cache instance
+     * @param cache    backing cache instance
      * @throws IOException if there is an error opening or reading from the file.
      */
     public Reader(File database, FileMode fileMode, NodeCache cache) throws IOException {
@@ -150,6 +150,7 @@ public class Reader implements GeoIp2Provider, Closeable {
     public JsonElement get(InetAddress ipAddress) throws IOException {
         return getRecord(ipAddress).getData();
     }
+
     /**
      * Looks up <code>ipAddress</code> in the MaxMind DB.
      *
@@ -299,13 +300,15 @@ public class Reader implements GeoIp2Provider, Closeable {
                         + databaseName + "). Is this a valid MaxMind DB file?");
     }
 
+    /**
+     * @return the metadata for the MaxMind DB file.
+     */
     @Override
     public Metadata getMetadata() {
         return this.metadata;
     }
 
     /**
-     /**
      * <p>
      * Closes the database.
      * </p>

@@ -1,7 +1,16 @@
 CHANGELOG
 =========
 
-1.3.0
+1.3.1 (2020-03-03)
+------------------
+
+* Correctly decode strings that are between 157 and 288 bytes long. 1.3.0
+  introduced a regression when decoding these due to using a signed `byte`
+  as an unsigned value. Reported by Dongmin Yu. GitHub #181 in
+  maxmind/GeoIP2-java.
+* Update `jackson-databind` dependency.
+
+1.3.0 (2019-12-13)
 ------------------
 
 * IMPORTANT: Java 7 is now required. If you need Java 6 support, please

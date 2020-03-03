@@ -14,8 +14,8 @@ public final class Record {
     /**
      * Create a new record.
      *
-     * @param data the data for the record in the database.
-     * @param ipAddress the IP address used in the lookup.
+     * @param data         the data for the record in the database.
+     * @param ipAddress    the IP address used in the lookup.
      * @param prefixLength the network prefix length associated with the record in the database.
      */
     public Record(JsonElement data, InetAddress ipAddress, int prefixLength) {

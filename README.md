@@ -54,6 +54,10 @@ dependencies {
 
 ## Usage ##
 
+*Note:* For accessing MaxMind GeoIP2 databases, we generally recommend using
+the [GeoIP2 Java API](http://maxmind.github.io/GeoIP2-java/) rather than using
+this package directly.
+
 To use the API, you must first create a `Reader` object. The constructor for
 the reader object takes a `File` representing your MaxMind DB. Optionally you
 may pass a second parameter with a `FileMode` with a value of `MEMORY_MAP` or

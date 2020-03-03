@@ -26,7 +26,7 @@ final class Decoder {
 
     private static final Gson OBJECT_MAPPER = new Gson();
 
-    private static final int[] POINTER_VALUE_OFFSETS = { 0, 0, 1 << 11, (1 << 19) + ((1) << 11), 0 };
+    private static final int[] POINTER_VALUE_OFFSETS = {0, 0, 1 << 11, (1 << 19) + ((1) << 11), 0};
 
     // XXX - This is only for unit testings. We should possibly make a
     // constructor to set this
@@ -129,17 +129,15 @@ final class Decoder {
 
         int size = ctrlByte & 0x1f;
         if (size >= 29) {
-            int bytesToRead = size - 28;
-            int i = this.decodeInteger(bytesToRead);
             switch (size) {
-            case 29:
-                size = 29 + i;
-                break;
-            case 30:
-                size = 285 + i;
-                break;
-            default:
-                size = 65821 + (i & (0x0FFFFFFF >>> 32 - 8 * bytesToRead));
+                case 29:
+                    size = 29 + (0xFF & buffer.get());
+                    break;
+                case 30:
+                    size = 285 + decodeInteger(2);
+                    break;
+                default:
+                    size = 65821 + decodeInteger(3);
             }
         }
 
